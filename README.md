@@ -72,6 +72,7 @@ Now we'll create a Maven POM that declares the Spring Boot plugins and dependenc
     <groupId>com.neopragma.javahelloservice</groupId>
     <artifactId>javahelloservice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -105,124 +106,408 @@ Now we'll create a Maven POM that declares the Spring Boot plugins and dependenc
 
 Notice this POM has a parent POM named _spring-boot-starter-parent_, which declares components of Spring Boot that are helpful for creating and packaging Spring applications. We also see a dependency named ```spring-boot-starter-data-rest```, which helps with setting up an application that will be a REST service.
 
+We've also overridden the default packaging and told Maven to package the artifact as a ```war```.
 
-### 16.2. The Main class
 
-You may recall we identified three _concerns_ in the sample code provided in the Spring Boot Tutorial:
+### 14.3. Maven directory structure
 
-* The "Hello, World!" functionality
-* The wrapper for the standalone version
-* The wrapper for the RESTful service version
+Let's create the basic directory structure for a Java Maven project.
 
-Just now we're addressing the wrapper for the standalone version. It will consist of a Java class that contains a ```main``` method, configured so that the Spring framework can start it.
+```shell
+mkdir -p src/main/java
+mkdir -p src/test/java
+```
 
-Should we test-drive this class? Some would say we should test-drive every line of production code we write, no matter what. Others would say this sort of code is basically boilerplate. All it will do is instantiate a ```Hello``` object and call its ```greet()``` method, which takes no arguments. It will also write the output from ```greet()``` to ```stdout```. 
+### 14.4. Import the project into Spring Tool Suite
 
-None of these operations represents unique application logic that we are hand-coding. It all amounts to wiring up some functionality provided by the Java compiler or the JVM. Everything it does will be validated at the integration test level; there's no finer-grained behavior to check at the unit level. Let's just write this one.
+We could have done all this from inside the IDE, but it's quicker and easier to do it on a command line. Let's bring the project into the IDE now. Just use the same procedure as we did previously.
 
-```java  
-package com.nepragma.javahelloapp;
-public class Main {	
-	static Hello hello;
-	public static void main(String[] args) {
-		hello = new Hello();
-		System.out.println(hello.greet());
-		System.exit(0);
+### 14.5. What Spring Boot provides
+
+An oddity about Spring is that you must have a ```main``` method, even if your application doesn't run standalone. The class for the service is straightforward. As a basic starting point, we only need this:
+
+```java 
+package com.neopragma.javahelloservice;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+ 
+@SpringBootApplication
+public class Application {
+ 
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}```
+
+This is where the value of Spring Boot becomes apparent. For the moment, let's just drop this boilerplate code into the project and see what it can do even before we've added any application-specific logic to it.
+
+We'll hope that participants feel uncomfortable about putting code into ```src/main/java``` without having first written test code in ```src/test/java```. It should feel _normal_ to write tests first, and _abnormal_ to write production code first. That way, when we _choose_ not to write tests first, we'll think about it carefully and be sure that we have good reasons.
+
+Before we do anything else, we can run
+
+```shell 
+mvn spring-boot:run
+```
+
+On the author's system, on the first try, this was (part of) the output from that command:
+
+```shell 
+Daves-MacBook-Pro:javahelloservice dave$ mvn spring-boot:run
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building javahelloservice 0.0.1-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] >>> spring-boot-maven-plugin:1.4.2.RELEASE:run (default-cli) > test-compile @ javahelloservice >>>
+
+(more Maven build output here, removed to save space)
+
+[INFO] 
+[INFO] --- spring-boot-maven-plugin:1.4.2.RELEASE:run (default-cli) @ javahelloservice ---
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v1.4.2.RELEASE)
+
+2016-11-19 07:01:35.358  INFO 2730 --- [           main] c.n.javahelloservice.Application         : Starting Application on Daves-MacBook-Pro.local with PID 2730 (/Users/dave/Documents/Projects/javahelloservice/target/classes started by dave in /Users/dave/Documents/Projects/javahelloservice)
+2016-11-19 07:01:35.362  INFO 2730 --- [           main] c.n.javahelloservice.Application         : No active profile set, falling back to default profiles: default
+
+(more Spring Boot output here, removed to save space)
+
+(notice this: it's automatically defining RESTful routes)
+
+2016-11-19 07:01:39.127  INFO 2730 --- [           main] o.s.d.r.w.RepositoryRestHandlerMapping   : Mapped "{[/{repository}/{id}],methods=[PATCH],produces=[application/hal+json || application/json || application/*+json;charset=UTF-8]}" onto public org.springframework.http.ResponseEntity<org.springframework.hateoas.ResourceSupport> 
+
+(more output like the above, removed to save space)
+
+2016-11-19 07:01:39.143  INFO 2730 --- [           main] o.s.d.r.w.BasePathAwareHandlerMapping    : Mapped "{[/profile/{repository}],methods=[GET],produces=[application/schema+json]}" onto public org.springframework.http.HttpEntity<org.springframework.data.rest.webmvc.json.JsonSchema> org.springframework.data.rest.webmvc.RepositorySchemaController.schema(org.springframework.data.rest.webmvc.RootResourceInformation)
+2016-11-19 07:01:39.166  INFO 2730 --- [           main] .m.m.a.ExceptionHandlerExceptionResolver : Detected @ExceptionHandler methods in repositoryRestExceptionHandler
+2016-11-19 07:01:39.309  INFO 2730 --- [           main] o.s.j.e.a.AnnotationMBeanExporter        : Registering beans for JMX exposure on startup
+2016-11-19 07:01:39.417  INFO 2730 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080 (http)
+2016-11-19 07:01:39.422  INFO 2730 --- [           main] c.n.javahelloservice.Application         : Started Application in 5.144 seconds (JVM running for 10.082)
+                    
+```
+
+There's an embedded Tomcat server running on ```localhost:8080```. If we open a second command prompt, we can interact with the bare-bones default REST service.
+
+Spring Boot creates a default query named ```_links``` that returns all the RESTful routes available. Let's use ```curl``` to invoke it, and see what it returns:
+
+```shell 
+curl localhost:8080
+```
+
+It returns:
+
+```shell 
+{ "_links" : { 
+  "profile" : { 
+    "href" : "http://localhost:8080/profile" }
+  }
+}
+```
+
+So far, the application doesn't do anything useful, but the structure is in place and it runs. All this comes for free from Spring Boot. 
+
+
+### 14.6. Where does TDD fit in?
+
+It's a generally-accepted good practice to test-drive all code that we write ourselves. So far, we've only used functionality provided out-of-the-box by Spring Boot. We may assume someone else has already ensured that code works correctly. Even if that assumption is optimistic, we can _safely_ assume that some one else is _responsible_ for ensuring that code works correctly. _We_ are responsible for the code _we_ write.
+
+Our application needs to pull in the library jar we created in part 1 of the walkthrough, named ```javahellolib```. Then the ```main``` method of the service needs to call the ```greet``` method of the ```Hello``` class. 
+
+Spring Boot does not automatically provide that logic, and neither does any other framework or tool. As a question of good practice, then, we should test-drive that part of the code.
+
+
+### 14.7. Using test doubles
+
+Remind participants of the canonical test automation pyramid. When we test-drive code, we're working at the "unit" level of the pyramid, writing _microtests_. The _scope_ of a microtest for Java code is a single path through a single method. 
+
+A rule of thumb for any automated test case is that the case should be able to fail for exactly one reason: That the code under test doesn't behave as expected. Test cases should _not_ be vulnerable to failure because of database corruption, network resource availability, a change in input data, or a bug in a collaborator. 
+
+Our ```Hello``` class is a collaborator of our service application. In our microtest, we want to be sure the service calls the ```greet``` method, but we don't want to be vulnerable to a failure in case the ```greet``` method has a bug. We've already checked that in the microtests for the ```Hello``` class. We'll put the two pieces together in an _integration test_ shortly, but that is _not_ the job of a microtest.
+
+To mask off collaborators in test code, we use _test doubles_ to stand in for the real collaborators. Two types of test doubles are commonly used:
+
+* **stub** - exhibits lowest-common-denominator behavior only; basically does "nothing"
+* **mock** - presents the same API as the real thing and returns a set value defined by the test case; can also count the number of times it's called during the test.
+
+You can roll your own test doubles or you can use a library to handle it for you. Several libraries are available for the Java language. We're going to use one called Mockito for this walkthrough.
+
+### 14.8. Adding Mockito to the project
+
+Maven needs to know about Mockito, so we'll declare it as a dependency. We're only using it at _test_ scope, so we'll specify that in the declaration.
+
+```xml 
+<dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-all</artifactId>
+    <version>1.9.5</version>
+    <scope>test</scope>
+</dependency>
+```
+
+We'll suggest adding this right under the JUnit dependency, as they both pertain to unit testing. Ordering the declarations in a logical way helps people understand the POM. POM files tend to become large, and anything we can do to help our colleagues deal with them will be appreciated.
+
+
+### 14.9. Test-driving the "Hello" functionality in the service
+
+Now that our testing and mocking resources are configured, let's assert the behavior we want to see. 
+
+Our RESTful service will need to have a Spring Rest controller class. That will be the object that calls our ```Hello``` functionality, so that's the class we'll test-drive. We'll treat the boilerplate ```Application``` class as a free gift, courtesy of Spring Boot.
+
+This isn't the greatest example for TDD, as most of the work is done for us by the Spring framework. The only application logic we need to hand-code is the Spring Bean configuration and the call to the ```greet``` method of class ```Hello```. 
+
+The former is boilerplate. It looks like this:
+
+```java 
+package com.neopragma.javahelloservice;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import com.neopragma.javahellolib.Hello;
+
+@Configuration
+public class AppConfig {
+    @Bean
+    public Hello hello() {
+        return new Hello();
+    }
+}
+```
+
+For the latter, we can use a _mock_ to check that the call is made without making our test case vulnerable to possible bugs in the underlying ```Hello``` class. 
+
+First, we need to declare ```javahellolib``` as a dependency in the ```javahelloservice``` project.
+
+```xml 
+<dependency>
+    <groupId>com.neopragma</groupId>
+    <artifactId>javahellolib</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+Now we assert the behavior we want to see. We'll just present a finished test class, as there are several new concepts at play.
+
+```java 
+import static org.mockito.Mockito.verify;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import com.neopragma.javahellolib.Hello;
+
+@RunWith(MockitoJUnitRunner.class)
+public class HelloControllerTest {
+	
+	@Mock Hello hello;
+	
+	@Test
+	public void itRetrievesTheGreeting() {
+		HelloController controller = new HelloController(hello);
+		controller.greeting();
+		verify(hello).greet();
 	}
 }
 ```
 
-Show them how to run this from inside the IDE and from a command line.
+Here's what's going on. There are several imports and annotations for library functionality we want to use. 
 
-### 11.2. Create an executable jar
+Mockito uses a custom runner to work with JUnit. To specify that, we need the ```@RunWith``` annotation provided by JUnit as well as the ```MockitoJUnitRunner``` class provided by Mockito. 
 
-The way to package a standalone Java application is as an _executable jar_. Let's do that using Maven.
+We also need the usual ```@Test``` annotation so JUnit will recognize which methods are meant to be test cases, as well as the ```@Mock``` annotation so Mockito will recognize which object references are meant to be mocks.
 
-One of the advantages of using Spring Boot is that it comes with a well-implemented Maven plugin to build executable jars, ```spring-boot-maven-plugin```. It works better than the usual ```maven-assembly-plugin``` or ```maven-jar-plugin``` that you may have used in the past, or the old ```maven-antrun-plugin``` workaround to run an ```ant``` task out of Maven. The plugin is declared in the sample POM shown above.
+Our test setup assumes there will be a class named ```HelloController``, which will be a Spring REST controller that takes an injected instance of ```Hello```.
 
-You can create the executable jar from the command line like this:
+When the Spring framework calls the ```greeting``` method on ```HelloController```, we _verify_ that the ```greeting``` method calls the ```greet``` method of ```Hello``` once. (_Once_ is the default for ```verify```, so it isn't specified.)
 
-```shell
-mvn package
+When the test fails for the right reason, we make it pass. You've seen this done step by step before, so we'll just present the resulting ```HelloController``` source.
+
+```java 
+package com.neopragma.javahelloservice;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import com.neopragma.javahellolib.Hello;
+
+@RestController
+public class HelloController {	
+  	private Hello hello;	
+  	public HelloController(Hello hello) {
+  		this.hello = hello;
+  	} 
+    @RequestMapping(method=RequestMethod.GET, value={"/greeting"})
+    public String greeting() {
+        return hello.greet();
+    }
+}
 ```
 
-You can also build it from within the IDE. Spring Tool Suite comes with several Maven run configurations predefined, but they don't include one for ```mvn package```. Show participants how to create a new run configuration.
+Now we rebuild:
 
-![Maven package](images/mvn-package-run-config.png "Maven package")
-
-Note that by using the Springboot Maven plugin, you've made the application compatible with Cloud Foundry. Show participants the project properties in Spring Tool Suite:
-
-![Properties](images/cloud-foundry-standalone.png "Properties")
-
-This doesn't mean we _must_ deploy to Cloud Foundry. It's only a convenience built into Spring Tool Suite to support Cloud Foundry. In fact, we'll be deploying to Heroku later in this exercise (because it's free).
-
-### 11.3. Run the application
-
-Now you can use that run configuration to create the executable jar from within the IDE using the "Run as..." option from the context menu.
-
-To execute the resulting application from the command line, use:
-
-```shell
-java -jar target/javahelloapp-0.0.1-SNAPSHOT.jar
+```shell 
+mvn clean package
 ```
 
-To execute it from within the IDE, open the context menu and choose Run as... Java application.
+and restart our local Tomcat server via Spring Boot
 
-### 11.4 Create a script to run the application
-
-It's not very convenient to type the ```java``` command to run the application. It would be easier if we wrapped the command in a script with an easy-to-remember name, like ```run```. The script is just a one-liner: The ```java``` command. Remember to give it execute permission.
-
-
-### 11.5 Create a .gitignore file
-
-When we imported the project into Spring Tool Suite, some IDE-specific files were created in the project directory that we don't want to store in version control. 
-
-The IDE doesn't show hidden files by default. You can make it do so, but it isn't very intuitive. Show participants how to do this. 
-
-First, locate the nearly-invisible drop-down menu button near the upper right-hand corner of the Package Explorer tab.
-
-![Explorer menu](images/explorer-menu-icon.png "Package Explorer menu")
-
-Choose Filters... to open a dialog where you can control which files appear in Package Explorer. 
-
-![Filters](images/java-element-filters.png "Filters")
-
-Instead of choosing which files to display, you're choosing which files _not_ to display. The entry ```.* resources``` is already checked. Uncheck it to make the IDE show hidden files in Package Explorer.
-
-Show participants how to create a ```.gitignore``` file (or edit the one Springboot generated) to control which files will be committed to version control.
-
-To prevent unwanted files from being stored in git, we put the following entries in ```.gitignore```:
-
-```shell  
-.DS_Store
-target
-.classpath
-.project
-.settings
-*~
+```shell 
+mvn spring-boot:run
 ```
 
-If you're using another operating system, you might see temporary files specific to that system that you'll want to include in ```.gitignore``` as well. For example, when you edit a file on Ubuntu Linux using the default text editor, it creates a temporary file with a tilde on the end of its name. Editing a file named ```MyClass.java``` will cause another file to be created, named ```MyClass.java~```. 
+and try our ```curl``` command again
 
-You _do_ want the ```.gitignore``` file itself to be maintained under version control.
+```shell 
+curl localhost:8080/greeting
+```
 
-### 11.6 Commit, push, and build
+and we see the familiar "Hello, World!" text appear on the console.
 
-Now commit and push the changes and watch the build run in Travis CI.
 
-## 12. Setting up continuous deployment
+## 15. Integration tests
 
-Remind participants of the canonical delivery pipeline and/or the diagram showing loops within loops. We're going to extend the pipeline for our tutorial exercise to include automated deployment.
+We rushed through that last bit because you've seen similar steps before, and we want to move on to something new: Integration tests.
 
-Go to Heroku and define the tutorial app there, using your credentials or setting up new credentials as you please. This will be a _one-off dyno_ app to execute the standalone Java application we just built.
+So far, we haven't written any automated tests or checks beyond the _unit_ or _microtest_ level. It would be prudent to run integration tests before promoting our application to production. Let's see how to include that level of testing in our Maven build.
 
-Use the Travis and Heroku command line tools to create an encrypted API key for Heroku, like this:
+We can tell Maven when to run specific types of tests by using the ```surefire``` and ```failsafe``` plugins to control which test classes are associated with which Maven goals.
+
+We can use the ```@Category``` interface in JUnit to group specific test classes into whatever sort of categories make sense for our application. 
+
+Using these two features together, we can control when the unit tests run and when the integration tests run.
+
+Let's begin by creating an integration test class and marking it with the ```@Category``` annotation. First, we need an interface to identify integration test classes.
+
+```java 
+package com.neopragma.javahelloservice;
+
+public interface IntegrationTest() {}
+``` 
+
+Now we can create an integration test class and mark it using the ```@Category``` annotation. 
+
+```java 
+package com.neopragma.javahelloservice;
+
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import com.neopragma.javahellolib.Hello;
+
+@Category(IntegrationTest.class)
+public class HelloControllerIT {
+	
+	@Test
+	public void itReturnsHelloWorld() {
+		HelloController controller = new HelloController(new Hello());
+		assertEquals("Hello, World!", controller.greeting());
+	}
+}
+```
+
+This isn't the most interesting test class ever written. It's pretty much the same as the microtest, except this time we're passing the _real_ ```Hello``` to the constructor of ```HelloController```.
+
+The goal of the test case is to ensure that the correct text is returned by the controller after it retrieves the value from the ```Hello``` class. 
+
+The scope of this test lies between the _microtest_ level and the _end-to-end functional_ level. We're checking that the two classes, ```HelloController``` and ```Hello```, are connected properly. That's what an integration test is for: To see that two components are connected properly. That's all. 
+
+We can run this inside the IDE using Run as -> JUnit test to be sure we've coded it correctly. 
+
+Now we need to tell Maven when to run this test. The ```surefire``` plugin controls the execution of _unit_ tests, and the ```failsafe``` plugin controls the execution of _integration_ tests. We'll tell the ```surefire``` plugin to _exclude_ classes marked as ```IntegrationTest```, and we'll tell the ```failsafe``` plugin to _include_ them.
+
+```xml 
+<plugin>
+  <artifactId>maven-surefire-plugin</artifactId>
+  <version>2.18.1</version>
+  <configuration>
+    <excludedGroups>com.neopragma.javahelloservice.IntegrationTest</excludedGroups>
+  </configuration>
+</plugin>
+<plugin>
+  <artifactId>maven-failsafe-plugin</artifactId>
+  <version>2.18.1</version>
+  <configuration>
+    <includes>
+      <include>**/*.java</include>
+    </includes>
+    <groups>com.neopragma.javahelloservice.IntegrationTest</groups>
+  </configuration>
+  <executions>
+    <execution>
+      <goals>
+        <goal>integration-test</goal>
+        <goal>verify</goal>
+      </goals>
+    </execution>
+  </executions> 
+</plugin>
+```
+
+Let's try it and see what happens.
+
+When we run
+
+```shell 
+mvn test
+```
+
+we see that Maven ran the unit test:
+
+```shell 
+Running com.neopragma.javahelloservice.HelloControllerTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 sec - in com.neopragma.javahelloservice.HelloControllerTest
+
+Results :
+
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+```
+
+When we run
+
+```shell 
+mvn verify
+```
+
+we see that Maven separately ran the unit test and then the integration test:
+
+```shell 
+Running com.neopragma.javahelloservice.HelloControllerIT
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 sec - in com.neopragma.javahelloservice.HelloControllerIT
+
+Results :
+
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+```
+
+
+## 16. Setting up continuous integration and continuous deployment
+
+So far we've been working locally for this part of the walkthrough. Let's set up our continuous integration on Travis CI with continuous delivery to Heroku, as we did for ```javahelloapp```.
+
+On http://travis-ci.org we flip the switch on our Gihub repository for ```javahelloservice```. Then we go to http://heroku.com and create an app named ```javahelloservice```.
+
+Now we create a ```.travis.yml``` file for the ```javahelloservice``` project with the usual base content for a Java 8 app:
+
+```yml 
+language: java
+jdk:
+- oraclejdk8
+```
+
+Next, we use the Travis and Heroku command line tools to create an encrypted API key for Heroku, like this:
 
 ```shell  
 travis encrypt $(heroku auth:token) --add deploy.api_key
 ```
 
-Edit the ```.travis.yml``` file and add a ```provider``` specification. The file should now look something like this:
+We see that it added the ```deploy``` section to our ```.travis.yml``` file, but it didn't add a ```provider``` key. After adding that manually, we have:
 
 ```shell
 language: java
@@ -234,15 +519,10 @@ deploy:
     secure: [a long encrypted value appears here]
 ```
 
-Now when you commit and push the modified ```.travis.yml``` file to Github, the build will start on Travis CI and (assuming it worked) the application will be deployed to Heroku.
 
-Because this is a standalone application that runs in a one-off dyno, it will not start automatically and it will not remain operational when you execute it. Show the group how to run such an app on Heroku:
 
-```shell
-heroku run bash --app springboot-tutorial
-~ $ java -jar target/hello-0.0.1-SNAPSHOT.jar
-Hello, World!
-```
+
+
 
 ## 13. Where do we stand?
 
