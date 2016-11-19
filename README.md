@@ -27,7 +27,7 @@ In the first two parts of the walkthrough, we touched on several activities that
 In this (final) part, we'll touch on a couple more:
 
 * Writing a RESTful microservice in Java suitable for cloud deployment
-* Organizing an automated test suite
+* Separating _unit_ and _integration_ tests in Maven
 
 
 ## 14. Write a RESTful service deployable as a war
@@ -519,24 +519,39 @@ deploy:
     secure: [a long encrypted value appears here]
 ```
 
+Now when you push to Github, you should see a Travis CI build start. It will attempt to deploy to Heroku, but will get an error because our ```javahellolib``` jar isn't present in Maven Central. The general CI/CD process is working, however. 
 
 
+## 17. Tools and more tools 
+
+In going through this walkthrough, you may have noticed a large quantity of "stuff" above and beyond the application code. Resources and artifacts and scaffolding and external servers and test cases and configuration files and scripts...the list goes on. The quantity of code downloaded as dependencies was huge, compared with the amount of code in the "Hello, World!" application itself. There's only one microtest in this example, but it's common to see 5 to 10 times as much unit test code as production code in a "real" application. 
+
+All of this is pretty normal, but we often don't notice it or think much of it. It goes to show how much tools like Maven, Spring Boot, Travis CI, and Heroku help us. We can focus our efforts on value-add application logic, while leaving most of the scaffolding to tools and services.
 
 
+## 18. Whose job is it, anyway? 
 
-## 13. Where do we stand?
+Programmers may be accustomed to leaving most of these responsibilities to others - writing test cases, configuring the build script, defining projects in version control systems, setting up the CI server, managing automated deployment, preparing artifacts to be uploaded to repositories, provisioning environments, and so forth. Programmers like to be called "developers" or "engineers," but if all they do is sling code...?
 
-We've looked at several good development practices so far:
+As we direct our career growth toward being _developers_ as opposed to _coders_, we'll be dealing with more and more of these things ourselves, rather than depending on specialized teams to do various bits and pieces for us. What of the people on those specialized teams? Well, they'll become _developers_, too. They'll be learning how to program, along with all the other development skills. As the saying goes: It's all rock and roll.
 
-1. Version control [check]
-1. Single branch strategy [check]
-1. Separation of concerns [check]
-1. Test-driven development [check]
-1. Continuous Integration [check]
-1. Static code analysis [not yet]
-1. Automated unit tests [check]
-1. Automated packaging [check]
-1. Automated integration, functional, and system tests [not yet]
-1. Automated deployment [check]
-1. Loose ends - javadoc comments, etc. [not yet]
 
+## 19. Where do we stand?
+
+We've touch on quite a few good practices for software development and delivery, although we haven't taken a deep dive into any of them. Feel free to follow up and do so, as your interests guide you.
+
+* Using Maven for Java projects
+* Separation of concerns
+* Using a version control system
+* Single branch strategy
+* Setting up continuous integration
+* Using an IDE
+* Packaging a reusable jar to be uploaded to a repository
+* Test-driving application code through microtests
+* Benefits of frequent commits
+* Using Spring Boot with Maven 
+* Packaging applications for deployment
+* Setting up continuous deployment
+* Writing a standalone Java application suitable for cloud deployment
+* Writing a RESTful microservice in Java suitable for cloud deployment
+* Separating _unit_ and _integration_ tests in Maven
