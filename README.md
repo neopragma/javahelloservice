@@ -492,7 +492,7 @@ Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
 
 So far we've been working locally for this part of the walkthrough. Let's set up our continuous integration on Travis CI with continuous delivery to Heroku, as we did for ```javahelloapp```.
 
-On http://travis-ci.org we flip the switch on our Gihub repository for ```javahelloservice```. Then we go to http://heroku.com and create an app named ```javahelloservice```.
+On http://travis-ci.org we flip the switch on our Github repository for ```javahelloservice```. Then we go to http://heroku.com and create an app named ```javahelloservice```.
 
 Now we create a ```.travis.yml``` file for the ```javahelloservice``` project with the usual base content for a Java 8 app:
 
