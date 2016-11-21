@@ -539,7 +539,7 @@ As we direct our career growth toward being _developers_ as opposed to _coders_,
 
 ## 19. Where do we stand?
 
-We've touch on quite a few good practices for software development and delivery, although we haven't taken a deep dive into any of them. Feel free to follow up and do so, as your interests guide you.
+We've touched on quite a few good practices for software development and delivery, although we haven't taken a deep dive into any of them. Feel free to follow up and do so, as your interests guide you.
 
 * Using Maven for Java projects
 * Separation of concerns
