@@ -138,7 +138,8 @@ public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-}```
+}
+```
 
 This is where the value of Spring Boot becomes apparent. For the moment, let's just drop this boilerplate code into the project and see what it can do even before we've added any application-specific logic to it.
 
