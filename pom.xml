@@ -18,6 +18,7 @@
     </parent>
 
     <dependencies>
+<!--     
       <dependency>
           <groupId>com.neopragma</groupId>
           <artifactId>javahellolib</artifactId>
@@ -25,7 +26,7 @@
           <scope>system</scope>
           <systemPath>${project.basedir}/lib/javahellolib-1.0.0.jar</systemPath>
       </dependency>
-      
+-->      
       <dependency>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-web</artifactId>
